@@ -7,11 +7,11 @@ from dotenv import load_dotenv
 from datetime import datetime
 from src.utils.constants import ColumnMappings
 
-# Create logs directory if it doesn't exist
+
 LOG_DIR = 'logs'
 os.makedirs(LOG_DIR, exist_ok=True)
 
-# Configure logging
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -47,14 +47,14 @@ class SnowflakeConnector:
             schema: Snowflake schema
             disable_ssl_verification: Disable SSL certificate verification (for testing only)
         """
-        # Load environment variables if not provided
+        
         load_dotenv()
         
-        # Use environment variables or provided parameters
-        # Extract account identifier from full hostname
+        
+        
         raw_account = account or os.getenv('SNOWFLAKE_ACCOUNT')
         if raw_account:
-            # Remove .snowflakecomputing.com or similar suffixes
+            
             self.account = raw_account.split('.')[0]
         else:
             self.account = None
@@ -65,13 +65,13 @@ class SnowflakeConnector:
         self.database = database or os.getenv('SNOWFLAKE_DATABASE')
         self.schema = schema or os.getenv('SNOWFLAKE_SCHEMA')
         
-        # SSL verification flag
+        
         self.disable_ssl_verification = disable_ssl_verification
         
-        # Validate required parameters
+        
         self._validate_credentials()
         
-        # Connection object
+        
         self.connection = None
         self.cursor = None
     
@@ -103,7 +103,7 @@ class SnowflakeConnector:
             snowflake.connector.connection.SnowflakeConnection: Active connection
         """
         try:
-            # Prepare connection parameters
+            
             conn_params = {
                 'account': self.account,
                 'user': self.username,
@@ -113,12 +113,12 @@ class SnowflakeConnector:
                 'schema': self.schema
             }
             
-            # Add SSL verification option if disabled
+            
             if self.disable_ssl_verification:
                 logger.warning("SSL certificate verification is DISABLED. This is NOT recommended for production!")
                 conn_params['insecure_mode'] = True
             
-            # Establish connection
+            
             self.connection = snowflake.connector.connect(**conn_params)
             self.cursor = self.connection.cursor()
             logger.info("Successfully connected to Snowflake")
@@ -152,11 +152,11 @@ class SnowflakeConnector:
             list: Query results
         """
         try:
-            # Ensure connection is active
+            
             if not self.connection:
                 self.connect()
             
-            # Execute query
+            
             self.cursor.execute(query, params)
             return self.cursor.fetchall()
         except Exception as e:
@@ -190,32 +190,32 @@ class SnowflakeConnector:
             if not self.connection:
                 self.connect()
             
-            # Use provided or default database and schema
+            
             target_database = database or self.database
             target_schema = schema or self.schema
             
-            # Add source file column if provided
+            
             if source_file and 'SOURCE_FILE' not in df.columns:
                 df['SOURCE_FILE'] = source_file
             
-            # Sanitize column names for Snowflake
+            
             df = df.copy()
             df.columns = [col.upper().replace(' ', '_').replace('-', '_') for col in df.columns]
             
-            # Validate chunk size
-            chunk_size = max(1000, min(chunk_size, 100000))  # Constrain chunk size between 1000 and 100,000
             
-            # Total tracking variables
+            chunk_size = max(1000, min(chunk_size, 100000))  
+            
+            
             total_success = True
             total_nchunks = 0
             total_nrows = 0
             
-            # Chunked writing with optional parallel processing
+            
             for i in range(0, len(df), chunk_size):
                 chunk = df.iloc[i:i+chunk_size]
                 
                 try:
-                    # Write chunk to Snowflake
+                    
                     success, nchunks, nrows, _ = write_pandas(
                         conn=self.connection,
                         df=chunk,
@@ -224,19 +224,19 @@ class SnowflakeConnector:
                         schema=target_schema
                     )
                     
-                    # Update tracking variables
+                    
                     total_success &= success
                     total_nchunks += nchunks
                     total_nrows += nrows
                     
-                    # Log progress
+                    
                     logger.info(f"Wrote chunk {i//chunk_size + 1}: {nrows} rows")
                     
                 except Exception as chunk_error:
                     logger.error(f"Error writing chunk {i//chunk_size + 1}: {chunk_error}")
                     total_success = False
             
-            # Final logging
+            
             logger.info(f"Successfully wrote {total_nrows} rows to {target_database}.{target_schema}.{table_name}")
             
             return total_success, total_nchunks, total_nrows
@@ -259,40 +259,40 @@ class SnowflakeConnector:
             bool: True if write was successful, False otherwise
         """
         try:
-            # Ensure connection is established
+            
             if not self.connection:
                 self.connect()
             
-            # Prepare DataFrame for Snowflake
+            
             write_df = df.copy().reset_index(drop=True)
             
-            # Log original columns
+            
             logger.info(f"Original DataFrame columns: {list(write_df.columns)}")
             
-            # Map to Snowflake column names
+            
             write_df = ColumnMappings.map_to_snowflake_columns(write_df)
             
-            # Remove quotes from column names
+            
             write_df.columns = write_df.columns.str.replace('"', '')
             
-            # Log mapped columns
+            
             logger.info(f"Mapped DataFrame columns: {list(write_df.columns)}")
             
-            # Convert date columns to a consistent format
+            
             date_columns = ['Open_Dt', 'Consul_Dt', 'DOB']
             
             for col in date_columns:
                 if col in write_df.columns:
-                    # Convert to datetime first, then to a string in YYYY-MM-DD format
+                    
                     write_df[col] = pd.to_datetime(write_df[col], errors='coerce').dt.strftime('%Y-%m-%d')
             
-            # Prepare cursor
+            
             cursor = self.connection.cursor()
             
-            # Prepare full table name
+            
             full_table_name = f"{database}.{schema}.{table_name}"
             
-            # Write DataFrame to Snowflake
+            
             success, nchunks, nrows = self.write_dataframe(
                 df=write_df, 
                 table_name=table_name,
@@ -300,7 +300,7 @@ class SnowflakeConnector:
                 chunk_size=10000
             )
             
-            # Log results
+            
             logger.info(f"Successfully wrote {nrows} rows to {full_table_name}")
             logger.info(f"Data write results - Success: {success}, Chunks: {nchunks}, Rows: {nrows}")
             
@@ -311,7 +311,7 @@ class SnowflakeConnector:
             raise
         
         finally:
-            # Close cursor and connection
+            
             if cursor:
                 cursor.close()
 
@@ -328,12 +328,12 @@ class SnowflakeConnector:
         """
         self.close()
 
-# Example usage
+
 if __name__ == '__main__':
-    # Demonstrate basic usage
+    
     try:
         with SnowflakeConnector() as sf:
-            # Example query
+            
             results = sf.execute_query("SELECT CURRENT_WAREHOUSE()")
             print("Current Warehouse:", results[0][0])
     except Exception as e:

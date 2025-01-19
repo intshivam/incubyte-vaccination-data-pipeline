@@ -2,27 +2,27 @@ class ColumnMappings:
     """
     Mapping of column names across different input formats to standardized names
     """
-    # Mapping of source column names to standardized names
+    
     COLUMN_MAP = {
-        # USA file columns
+        
         'ID': 'Customer_Id',
         'Name': 'Customer_Name',
         'VaccinationType': 'Vaccination_Id',
         'VaccinationDate': 'Open_Date',
         
-        # AUS file columns
+        
         'Unique ID': 'Customer_Id',
         'Patient Name': 'Customer_Name',
         'Vaccine Type': 'Vaccination_Id',
         'Date of Birth': 'DOB',
         'Date of Vaccination': 'Open_Date',
         
-        # IND file columns
+        
         'DOB': 'DOB',
         'VaccinationType': 'Vaccination_Id',
         'VaccinationDate': 'Open_Date',
         
-        # Additional columns
+        
         'Doctor Name': 'Dr_Name',
         'Doctor': 'Dr_Name',
         'State/Province': 'State',
@@ -35,14 +35,14 @@ class ColumnMappings:
         'Post Code': 'Post_Code'
     }
 
-    # Mandatory columns for validation
+    
     MANDATORY_COLUMNS = [
         'Customer_Name', 
         'Customer_Id', 
         'Open_Date'
     ]
 
-    # Optional columns for validation
+    
     OPTIONAL_COLUMNS = [
         'Last_Consulted_Date', 
         'Vaccination_Id', 
@@ -53,7 +53,7 @@ class ColumnMappings:
         'DOB'
     ]
 
-    # Intermediate Snowflake table column mapping
+    
     SNOWFLAKE_COLUMN_MAP = {
         'Customer_Name': 'Name',
         'Customer_Id': 'Cust_I',
@@ -78,10 +78,10 @@ class ColumnMappings:
         Returns:
             DataFrame with mapped column names
         """
-        # Create a mapping of current column names to standardized names
+        
         column_mapping = {col: cls.COLUMN_MAP.get(col, col) for col in df.columns}
         
-        # Rename columns
+        
         return df.rename(columns=column_mapping)
 
     @classmethod
@@ -95,8 +95,8 @@ class ColumnMappings:
         Returns:
             DataFrame with Snowflake column names
         """
-        # Create a mapping of current column names to Snowflake names
+        
         snowflake_mapping = {col: cls.SNOWFLAKE_COLUMN_MAP.get(col, col) for col in df.columns}
         
-        # Rename columns
+        
         return df.rename(columns=snowflake_mapping)

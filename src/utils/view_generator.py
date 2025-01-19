@@ -9,7 +9,7 @@ def generate_country_views(countries, output_dir='scripts/dml/generated'):
         countries (list): List of countries to generate views for
         output_dir (str): Directory to store generated view SQL files
     """
-    # Ensure output directory exists
+    
     os.makedirs(output_dir, exist_ok=True)
     
     for country in countries:
@@ -63,7 +63,7 @@ FROM RankedCustomers
 WHERE RowNum = 1;
 """
         
-        # Save view to SQL file
+        
         view_filename = os.path.join(output_dir, f"{view_name}.sql")
         with open(view_filename, 'w') as f:
             f.write(view_query)
@@ -71,7 +71,7 @@ WHERE RowNum = 1;
         print(f"Generated view for {country}: {view_filename}")
 
 def main():
-    # Example usage
+    
     countries = ['India', 'USA', 'UK', 'Canada']
     generate_country_views(countries)
 
