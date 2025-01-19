@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual Environment
+venv/
+.env
+
+# Logs
+*.log
+logs/
+
+# Data files (optional, depending on data sensitivity)
+data/invalid_records/
+
+# Snowflake connection details
+*.snowflake.env
+
+# IDE files
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+
+# Generated SQL views
+scripts/dml/generated/
