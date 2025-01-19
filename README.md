@@ -18,6 +18,13 @@ This project implements a robust data engineering solution for processing vaccin
 - Snowflake Account
 - Virtual Environment Support
 
+## Database Setup
+Before running the ETL pipeline, execute the following DDL script in your Snowflake database:
+```bash
+snowsql -f scripts/ddl/create_intermediate_table.sql
+```
+**Note**: Ensure you are connected to the correct Snowflake account and have the necessary permissions to create tables.
+
 ## Installation
 
 ### 1. Clone the Repository
