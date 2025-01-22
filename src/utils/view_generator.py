@@ -44,7 +44,7 @@ WITH RankedCustomers AS (
             ORDER BY CONSUL_DT DESC
         ) as RowNum
     FROM VACCINATION_DATA.INTERMEDIATE_VACCINATION_RECORDS
-    WHERE COUNTRY = '{country}'
+    
 )
 SELECT 
     CUST_I,
@@ -60,7 +60,8 @@ SELECT
     AGE,
     DAYS_SINCE_CONSUL_GT_30
 FROM RankedCustomers
-WHERE RowNum = 1;
+WHERE RowNum = 1
+AND COUNTRY = '{country}';
 """
         
         
